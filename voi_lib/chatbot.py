@@ -53,22 +53,47 @@ class VoiAssistant:
         if self.index is None:
             raise ValueError("Assistant is not initialized.")
         
+        # Log the input query
+        print(f"Received query: {query}")
+
+        # Construct the classification prompt
         prompt = prompt_func(query, 1, self.role, self.classes)
+        print(f"Constructed classification prompt: {prompt}")
+
+        # Call the OpenAI API for classification
         category = openaiAPI(prompt, 0.5, self.openai_key)
-        
+        print(f"Classified category: {category}")
+
+        # Check if the category is in the predefined classes
         if category in self.classes:
+            print(f"Category '{category}' is in the predefined classes.")
+            
             if self.replies.get(category) == "RAG":
+                print("Category requires RAG. Attempting to retrieve relevant documents...")
+
+                # Perform RetrievalQA
                 retriever = self.index.vectorstore.as_retriever()
                 qa_chain = RetrievalQA.from_chain_type(llm=self.llm, chain_type="stuff", retriever=retriever)
                 result = qa_chain.run(query)
-                
+                print(f"RAG result: {result}")
+
                 if result in ("I don't know", "I don't know."):
+                    print("RAG result was 'I don't know'. Trying to rephrase the query.")
                     prompt = prompt_func(query, 2, self.role, self.classes)
                     result = openaiAPI(prompt, 0.9, self.openai_key)
+                    print(f"Rephrased query result: {result}")
             else:
+                # Use the predefined automatic reply
                 reply = self.replies.get(category, "I'm not sure how to respond to that.")
+                print(f"Using automatic reply: {reply}")
                 result = openaiAPI(f"Rephrase this: {reply}", 0.9, self.openai_key)
+                print(f"Rephrased automatic reply result: {result}")
         else:
+            print(f"Category '{category}' is not recognized.")
             result = "Unfortunately, I am unable to help you with that."
         
+        # Log the final result
+        print(f"Final result: {result}")
+        
         return result
+

@@ -1,6 +1,0 @@
-requests
-openai
-langchain
-langchain_openai
-langchain_community
-chromadb
