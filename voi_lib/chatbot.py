@@ -1,6 +1,7 @@
 import os
 import tempfile
 import requests
+import warnings  # Import to suppress warnings
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.document_loaders import PyPDFLoader
@@ -10,6 +11,9 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import TextSplitter
 
 from .utils import download_pdf_from_url, prompt_func, openaiAPI
+
+# Suppress all warnings
+warnings.filterwarnings("ignore")
 
 class VoiAssistant:
     def __init__(self, openai_key, pdf_url, role, classes, replies, segment_assignments):
@@ -44,57 +48,33 @@ class VoiAssistant:
             ).from_documents(documents)
             
             os.remove(downloaded_pdf_path)
-            print("Assistant initialized successfully")
         except Exception as e:
-            print(f"Error initializing Assistant: {str(e)}")
             self.index = None
     
     def get_response(self, query):
         if self.index is None:
             raise ValueError("Assistant is not initialized.")
-        
-        # Log the input query
-        print(f"Received query: {query}", flush=True)
 
         # Construct the classification prompt
         prompt = prompt_func(query, 1, self.role, self.classes)
-        print(f"Constructed classification prompt: {prompt}", flush=True)
 
         # Call the OpenAI API for classification
         category = openaiAPI(prompt, 0.5, self.openai_key)
-        print(f"Classified category: {category}", flush=True)
 
         # Check if the category is in the predefined classes
         if category in self.classes:
-            print(f"Category '{category}' is in the predefined classes.", flush=True)
-            
             if self.replies.get(category) == "RAG":
-                print("Category requires RAG. Attempting to retrieve relevant documents...", flush=True)
-
                 # Perform RetrievalQA
                 retriever = self.index.vectorstore.as_retriever()
                 qa_chain = RetrievalQA.from_chain_type(llm=self.llm, chain_type="stuff", retriever=retriever)
                 result = qa_chain.run(query)
-                print(f"RAG result: {result}", flush=True)
 
                 if result in ("I don't know", "I don't know."):
-                    print("RAG result was 'I don't know'. Trying to rephrase the query.", flush=True)
-                    prompt = prompt_func(query, 2, self.role, self.classes)
-                    result = openaiAPI(prompt, 0.9, self.openai_key)
-                    print(f"Rephrased query result: {result}", flush=True)
+                    result = prompt_func(query, 2, self.role, self.classes)
             else:
                 # Use the predefined automatic reply
-                reply = self.replies.get(category, "I'm not sure how to respond to that.")
-                print(f"Using automatic reply: {reply}", flush=True)
-                result = openaiAPI(f"Rephrase this: {reply}", 0.9, self.openai_key)
-                print(f"Rephrased automatic reply result: {result}", flush=True)
+                result = self.replies.get(category, "I'm not sure how to respond to that.")
         else:
-            print(f"Category '{category}' is not recognized.", flush=True)
             result = "Unfortunately, I am unable to help you with that."
         
-        # Log the final result
-        print(f"Final result: {result}", flush=True)
-        
         return result
-
-
