@@ -54,46 +54,47 @@ class VoiAssistant:
             raise ValueError("Assistant is not initialized.")
         
         # Log the input query
-        print(f"Received query: {query}")
+        print(f"Received query: {query}", flush=True)
 
         # Construct the classification prompt
         prompt = prompt_func(query, 1, self.role, self.classes)
-        print(f"Constructed classification prompt: {prompt}")
+        print(f"Constructed classification prompt: {prompt}", flush=True)
 
         # Call the OpenAI API for classification
         category = openaiAPI(prompt, 0.5, self.openai_key)
-        print(f"Classified category: {category}")
+        print(f"Classified category: {category}", flush=True)
 
         # Check if the category is in the predefined classes
         if category in self.classes:
-            print(f"Category '{category}' is in the predefined classes.")
+            print(f"Category '{category}' is in the predefined classes.", flush=True)
             
             if self.replies.get(category) == "RAG":
-                print("Category requires RAG. Attempting to retrieve relevant documents...")
+                print("Category requires RAG. Attempting to retrieve relevant documents...", flush=True)
 
                 # Perform RetrievalQA
                 retriever = self.index.vectorstore.as_retriever()
                 qa_chain = RetrievalQA.from_chain_type(llm=self.llm, chain_type="stuff", retriever=retriever)
                 result = qa_chain.run(query)
-                print(f"RAG result: {result}")
+                print(f"RAG result: {result}", flush=True)
 
                 if result in ("I don't know", "I don't know."):
-                    print("RAG result was 'I don't know'. Trying to rephrase the query.")
+                    print("RAG result was 'I don't know'. Trying to rephrase the query.", flush=True)
                     prompt = prompt_func(query, 2, self.role, self.classes)
                     result = openaiAPI(prompt, 0.9, self.openai_key)
-                    print(f"Rephrased query result: {result}")
+                    print(f"Rephrased query result: {result}", flush=True)
             else:
                 # Use the predefined automatic reply
                 reply = self.replies.get(category, "I'm not sure how to respond to that.")
-                print(f"Using automatic reply: {reply}")
+                print(f"Using automatic reply: {reply}", flush=True)
                 result = openaiAPI(f"Rephrase this: {reply}", 0.9, self.openai_key)
-                print(f"Rephrased automatic reply result: {result}")
+                print(f"Rephrased automatic reply result: {result}", flush=True)
         else:
-            print(f"Category '{category}' is not recognized.")
+            print(f"Category '{category}' is not recognized.", flush=True)
             result = "Unfortunately, I am unable to help you with that."
         
         # Log the final result
-        print(f"Final result: {result}")
+        print(f"Final result: {result}", flush=True)
         
         return result
+
 
