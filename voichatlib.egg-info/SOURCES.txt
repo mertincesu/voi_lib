@@ -1,7 +1,6 @@
 LICENSE
 README.md
 setup.py
-tests/test_chatbot.py
 voi_lib/__init__.py
 voi_lib/chatbot.py
 voi_lib/config.py

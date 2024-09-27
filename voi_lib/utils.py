@@ -38,9 +38,9 @@ def prompt_func(query, n, role, classes):
             f"Query: {query}"
         )
     elif n == 2:
-        prompt = "Rephrase the following sentence: I apologize, but I don't have the information you're looking for at the moment."
+        prompt = "I apologize, but I don't have the information you're looking for at the moment."
     elif n == 3:
-        prompt = "Rephrase the following sentence: Unfortunately, I am unable to help you with that. Please provide more specific questions related to Voi AI."
+        prompt = "Unfortunately, I am unable to help you with that. Please provide more specific questions related to Voi AI."
 
     return prompt
 
