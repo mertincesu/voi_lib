@@ -9,21 +9,22 @@ from langchain_community.vectorstores import Chroma  # Chroma import
 from langchain_openai import OpenAIEmbeddings  # Updated import
 from langchain.text_splitter import RecursiveCharacterTextSplitter  # Updated import
 
-from .utils import download_pdf_from_url, prompt_func, openaiAPI
+from .utils import download_pdf_from_url, prompt_func, openaiAPI, openaiReply
 
 # Suppress all warnings
 warnings.filterwarnings("ignore")
 
 class VoiAssistant:
-    def __init__(self, openai_key, pdf_url, role, classes, replies, segment_assignments):
+    def __init__(self, openai_key, pdf_url, role, intents, replies, segment_assignments, dont_know_response=None):
         # Initialize API key and other configurations
         self.openai_key = openai_key
         os.environ['OPENAI_API_KEY'] = self.openai_key
         self.pdf_url = pdf_url
         self.role = role
-        self.classes = classes
+        self.intents = intents
         self.replies = replies
         self.segment_assignments = segment_assignments
+        self.dont_know_response = dont_know_response if dont_know_response else {}  # Custom responses from the user
         self.index = None
         self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.9)
     
@@ -58,13 +59,13 @@ class VoiAssistant:
             raise ValueError("Assistant is not initialized.")
 
         # Construct the classification prompt
-        prompt = prompt_func(query, 1, self.role, self.classes)
+        prompt = prompt_func(query, 1, self.role, self.intents)
 
         # Call the OpenAI API for classification
         category = openaiAPI(prompt, 0.5, self.openai_key)
 
         # Check if the category is in the predefined classes
-        if category in self.classes:
+        if category in self.intents:
             if self.replies.get(category) == "RAG":
                 # Perform RetrievalQA
                 retriever = self.index.as_retriever()
@@ -72,9 +73,13 @@ class VoiAssistant:
                 result = qa_chain.run(query)
 
                 if result in ("I don't know", "I don't know."):
-                    result = prompt_func(query, 2, self.role, self.classes)
+                    # Use custom response for n == 2, if provided, else default
+                    result = self.dont_know_response
+            elif self.replies.get(category) == "role_based_llm_reply":
+                # Use LLM to provide an appropriate role-based reply
+                result = openaiReply(query, 0.9, category, self.openai_key, self.role)
             else:
-                # Use the predefined automatic reply
+                # Use the predefined automatic reply, or a custom response for n == 3
                 result = self.replies.get(category, "I'm not sure how to respond to that.")
         else:
             result = "Unfortunately, I am unable to help you with that."

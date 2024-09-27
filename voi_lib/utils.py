@@ -15,18 +15,21 @@ def download_pdf_from_url(url):
     else:
         raise ValueError(f"Failed to download PDF from URL: {url}. Status code: {response.status_code}")
 
-def prompt_func(query, n, role, classes):
+def prompt_func(query, n, role, classes, custom_responses=None):
     """
-    Generates different types of prompts based on the query and role.
-
+    Generates different types of prompts based on the query, role, and other parameters.
+    
     Parameters:
     - query: The user query that needs to be classified or answered.
     - n: Defines which type of prompt is generated (classification, rephrase, etc.).
     - role: The role of the assistant (used in the prompt).
     - classes: Dictionary containing classes/categories for classification.
+    - custom_responses: A dictionary containing optional custom responses for prompts.
     
     Returns the generated prompt.
     """
+    
+    # Classify query
     class_list = ', '.join(f"'{c}'" for c in classes.keys())
     example_list = '. '.join([f"{cls}: {example}" for cls, example in classes.items()])
     
@@ -37,10 +40,6 @@ def prompt_func(query, n, role, classes):
             "Your response should ONLY be one of the categories provided, with no additional words. "
             f"Query: {query}"
         )
-    elif n == 2:
-        prompt = "I apologize, but I don't have the information you're looking for at the moment."
-    elif n == 3:
-        prompt = "Unfortunately, I am unable to help you with that. Please provide more specific questions related to Voi AI."
 
     return prompt
 
@@ -86,3 +85,48 @@ def openaiAPI(prompt, temp, openai_key, max_tokens=100):
     else:
         print(f"Error: {response.status_code} - {response.text}")
         return None
+    
+def openaiReply(input, temp, intent, openai_key, role, max_tokens=100):
+    """
+    Makes a request to the OpenAI API to generate a completion based on the given prompt.
+
+    Parameters:
+    - prompt: The prompt to send to OpenAI.
+    - temp: Temperature setting for the response generation.
+    - openai_key: API key for authentication with OpenAI.
+    - max_tokens: Maximum number of tokens to generate in the response.
+    
+    Returns the category or response from OpenAI.
+    """
+    api_url = "https://api.openai.com/v1/chat/completions"
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {openai_key}',
+    }
+    
+    data = {
+        "model": "gpt-4o",
+        "messages": [
+            {
+                "role": "system",
+                "content": role
+            },
+            {
+                "role": "user",
+                "content": "Provide a response to the following input by the user, which was classified as: " + intent + " considering the role defined for you: " + input
+            }
+        ],
+        "max_tokens": max_tokens,
+        "temperature": temp,
+    }
+
+    response = requests.post(api_url, headers=headers, json=data)
+
+    if response.status_code == 200:
+        reply = response.json()['choices'][0]['message']['content'].strip()
+        return reply
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
+        return None
+    
+    
