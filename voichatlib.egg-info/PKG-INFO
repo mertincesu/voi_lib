@@ -1,5 +1,5 @@
 Metadata-Version: 2.1
-Name: voi_lib
+Name: voichatlib
 Version: 0.1.0
 Summary: A Python library for creating virtual assistants using OpenAI and document retrieval
 Home-page: https://github.com/mertincesu/voi_lib.git
