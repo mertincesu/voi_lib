@@ -5,8 +5,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="voichatlib",  # The name of your library
-    version="0.1.5",  # Version of your library
+    name="voibot",  # The name of your library
+    version="0.1.8",  # Version of your library
     author="Mert Incesu",  # Your name or your organization's name
     author_email="mert.incesu03@gmail.com",  # Your contact email
     description="A Python library for creating virtual assistants using OpenAI and document retrieval",  # Short description of your library

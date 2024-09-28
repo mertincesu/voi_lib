@@ -113,7 +113,7 @@ def openaiReply(input, temp, intent, openai_key, role, max_tokens=100):
             },
             {
                 "role": "user",
-                "content": "Provide a response to the following input by the user, which was classified as: " + intent + " considering the role defined for you: " + input
+                "content": "Provide a response to the following input by the user, which was classified as: " + intent + "Make sure that the response you give considers the role defined for you, and the classification of the input: " + input
             }
         ],
         "max_tokens": max_tokens,
