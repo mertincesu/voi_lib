@@ -1,6 +1,6 @@
 # VoiLib
 
-VoiLib is a Python library for creating virtual assistants using OpenAI and document retrieval.
+VoiLib is a Python library for creating virtual assistants using OpenAI and RAG (via LangChain).
 
 ## Features
 - Support for OpenAI's GPT models
