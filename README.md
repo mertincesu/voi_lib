@@ -1,4 +1,4 @@
-# VoiLib
+# VoiBot Library
 
 VoiLib is a Python library for creating virtual assistants using OpenAI and RAG (via LangChain).
 
