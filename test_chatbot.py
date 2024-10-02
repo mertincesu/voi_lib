@@ -3,7 +3,7 @@
 from voibot.chatbot import VoiAssistant
 
 # Set up the parameters for the assistant
-
+openai_key = "key"
 pdf_url = "https://firebasestorage.googleapis.com/v0/b/voiage-67f40.appspot.com/o/pdfs%2Fdemo%2FVoiAssistantKnowledge.pdf?alt=media"  # Replace this with a valid PDF URL
 role = "You are an AI virtual assistant for Voi AI. You are tasked with answering questions about Voi AI or VoiBot"
 intents = {
