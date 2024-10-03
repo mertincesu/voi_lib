@@ -6,13 +6,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="voibot",  # The name of your library
-    version="0.1.9",  # Version of your library
+    version="0.1.10",  # Version of your library
     author="Mert Incesu",  # Your name or your organization's name
     author_email="mert.incesu03@gmail.com",  # Your contact email
     description="A Python library for creating virtual assistants using OpenAI and document retrieval",  # Short description of your library
     long_description=long_description,  # Long description (from README.md)
     long_description_content_type="text/markdown",  # Content type of long description
-    url="https://github.com/mertincesu/voi_lib.git",  # URL of the project's homepage (GitHub, etc.)
+    url="https://voiai.io",  # URL of the project's homepage (GitHub, etc.)
     packages=find_packages(),  # Automatically find packages in the current directory
     install_requires=[  # Dependencies required by your library
         "requests",
